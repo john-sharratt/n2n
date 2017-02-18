@@ -35,7 +35,7 @@ struct n2n_sn
     time_t              start_time;     /* Used to measure uptime. */
     sn_stats_t          stats;
     int                 daemon;         /* If non-zero then daemonise. */
-    const char*         eth;            /* Ethernet interface this is attached to (if any)
+    const char*         eth;            /* Ethernet interface this is attached to (if any) */
     uint16_t            lport;          /* Local UDP port to bind to. */
     int                 sock;           /* Main socket for UDP traffic with edges. */
     int                 mgmt_sock;      /* management socket. */
