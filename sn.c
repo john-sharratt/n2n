@@ -623,7 +623,7 @@ static int run_loop( n2n_sn_t * sss );
 /* *********************************************** */
 
 static const struct option long_options[] = {
-  { "interface",       required_argument, NULL, "i" },
+  { "interface",       required_argument, NULL, 'i' },
   { "foreground",      no_argument,       NULL, 'f' },
   { "local-port",      required_argument, NULL, 'l' },
   { "help"   ,         no_argument,       NULL, 'h' },
