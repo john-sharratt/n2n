@@ -42,7 +42,7 @@ const uint8_t ipv6_multicast_addr[6] = { 0x33, 0x33, 0x00, 0x00, 0x00, 0x00 }; /
 
 /* ************************************** */
 
-SOCKET open_socket(int local_port, int bind_any) {
+SOCKET open_socket(int local_port, int bind_any, const char * bind_interface) {
   SOCKET sock_fd;
   struct sockaddr_in local_address;
   int sockopt = 1;
@@ -58,6 +58,17 @@ SOCKET open_socket(int local_port, int bind_any) {
 #endif
 
   setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&sockopt, sizeof(sockopt));
+  
+  if (bind_interface != NULL)
+  {
+    struct ifreq ifr;
+    memset(&ifr, 0, sizeof(ifr));
+    snprintf(ifr.ifr_name, sizeof(ifr.ifr_name), bind_interface);
+    if (setsockopt(sock_fd, SOL_SOCKET, SO_BINDTODEVICE, (void *)&ifr, sizeof(ifr)) < 0) {
+      traceEvent(TRACE_ERROR, "Bind error [%s]\n", strerror(errno));
+      return(-1);
+    }
+  }
 
   memset(&local_address, 0, sizeof(local_address));
   local_address.sin_family = AF_INET;

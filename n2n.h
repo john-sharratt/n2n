@@ -219,7 +219,7 @@ extern int  tuntap_write(struct tuntap_dev *tuntap, unsigned char *buf, int len)
 extern void tuntap_close(struct tuntap_dev *tuntap);
 extern void tuntap_get_address(struct tuntap_dev *tuntap);
 
-extern SOCKET open_socket(int local_port, int bind_any);
+extern SOCKET open_socket(int local_port, int bind_any, const char * bind_interface);
 
 extern char* intoa(uint32_t addr, char* buf, uint16_t buf_len);
 extern char* macaddr_str(macstr_t buf, const n2n_mac_t mac);

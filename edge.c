@@ -95,11 +95,12 @@ struct n2n_edge
     size_t              sn_num;                 /**< Number of supernode addresses defined. */
     n2n_sn_name_t       sn_ip_array[N2N_EDGE_NUM_SUPERNODES];
     int                 sn_wait;                /**< Whether we are waiting for a supernode response. */
-
+    
     n2n_community_t     community_name;         /**< The community. 16 full octets. */
     char                keyschedule[N2N_PATHNAME_MAXLEN];
     int                 null_transop;           /**< Only allowed if no key sources defined. */
 
+    const char*         udp_interface;
     int                 udp_sock;
     int                 udp_mgmt_sock;          /**< socket for status info. */
 
@@ -485,6 +486,7 @@ static void help() {
 #endif /* #if defined(N2N_HAVE_DAEMON) */
 	 "[-m <MAC address>]"
 	 "\n"
+         "[-i <interface>] "
 	 "-l <supernode host:port> "
 	 "[-p <local port>] [-M <mtu>] "
 	 "[-r] [-E] [-v] [-t <mgmt port>] [-b] [-h]\n\n");
@@ -493,6 +495,7 @@ static void help() {
   printf("-d <tun device>          | tun device name\n");
 #endif
 
+  printf("-i <interface>           | tBinds to a specified interface device <interface>\n");
   printf("-a <mode:address>        | Set interface address. For DHCP use '-r -a dhcp:0.0.0.0'\n");
   printf("-c <community>           | n2n community name the edge belongs to.\n");
   printf("-k <encrypt key>         | Encryption key (ASCII) - also N2N_KEY=<encrypt key>. Not with -K.\n");
@@ -1114,6 +1117,7 @@ static int find_peer_destination(n2n_edge_t * eee,
 /* *********************************************** */
 
 static const struct option long_options[] = {
+  { "interface",       required_argument, NULL, 'i' },
   { "community",       required_argument, NULL, 'c' },
   { "supernode-list",  required_argument, NULL, 'l' },
   { "tun-device",      required_argument, NULL, 'd' },
@@ -2107,6 +2111,11 @@ int main(int argc, char* argv[])
             break;
         }
 
+        case 'i': /* interface */
+        {
+            eee.udp_interface = optarg;
+            break;
+        }
         case 'l': /* supernode-list */
         {
             if ( eee.sn_num < N2N_EDGE_NUM_SUPERNODES )
@@ -2276,14 +2285,14 @@ int main(int argc, char* argv[])
     /* else run in NULL mode */
 
 
-    eee.udp_sock = open_socket(local_port, 1 /*bind ANY*/ );
+    eee.udp_sock = open_socket(local_port, 1 /*bind ANY*/ , eee.udp_interface);
     if(eee.udp_sock < 0)
     {
         traceEvent( TRACE_ERROR, "Failed to bind main UDP port %u", (signed int)local_port );
         return(-1);
     }
 
-    eee.udp_mgmt_sock = open_socket(mgmt_port, 0 /* bind LOOPBACK*/ );
+    eee.udp_mgmt_sock = open_socket(mgmt_port, 0 /* bind LOOPBACK*/ , NULL);
 
     if(eee.udp_mgmt_sock < 0)
     {

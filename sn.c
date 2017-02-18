@@ -35,6 +35,7 @@ struct n2n_sn
     time_t              start_time;     /* Used to measure uptime. */
     sn_stats_t          stats;
     int                 daemon;         /* If non-zero then daemonise. */
+    const char*         eth;            /* Ethernet interface this is attached to (if any)
     uint16_t            lport;          /* Local UDP port to bind to. */
     int                 sock;           /* Main socket for UDP traffic with edges. */
     int                 mgmt_sock;      /* management socket. */
@@ -605,6 +606,7 @@ static int process_udp( n2n_sn_t * sss,
 static void exit_help(int argc, char * const argv[])
 {
     fprintf( stderr, "%s usage\n", argv[0] );
+    fprintf( stderr, "-i <interface>\tBinds to a specified interface device <interface>\n");
     fprintf( stderr, "-l <lport>\tSet UDP main listen port to <lport>\n" );
 
 #if defined(N2N_HAVE_DAEMON)
@@ -621,6 +623,7 @@ static int run_loop( n2n_sn_t * sss );
 /* *********************************************** */
 
 static const struct option long_options[] = {
+  { "interface",       required_argument, NULL, "i" },
   { "foreground",      no_argument,       NULL, 'f' },
   { "local-port",      required_argument, NULL, 'l' },
   { "help"   ,         no_argument,       NULL, 'h' },
@@ -642,6 +645,9 @@ int main( int argc, char * const argv[] )
         {
             switch (opt) 
             {
+            case 'i': /* interface */
+                sss.eth = optarg;
+                break;
             case 'l': /* local-port */
                 sss.lport = atoi(optarg);
                 break;
@@ -673,7 +679,7 @@ int main( int argc, char * const argv[] )
 
     traceEvent( TRACE_DEBUG, "traceLevel is %d", traceLevel);
 
-    sss.sock = open_socket(sss.lport, 1 /*bind ANY*/ );
+    sss.sock = open_socket(sss.lport, 1 /*bind ANY*/, sss.eth );
     if ( -1 == sss.sock )
     {
         traceEvent( TRACE_ERROR, "Failed to open main socket. %s", strerror(errno) );
@@ -684,7 +690,7 @@ int main( int argc, char * const argv[] )
         traceEvent( TRACE_NORMAL, "supernode is listening on UDP %u (main)", sss.lport );
     }
 
-    sss.mgmt_sock = open_socket(N2N_SN_MGMT_PORT, 0 /* bind LOOPBACK */ );
+    sss.mgmt_sock = open_socket(N2N_SN_MGMT_PORT, 0 /* bind LOOPBACK */, NULL );
     if ( -1 == sss.mgmt_sock )
     {
         traceEvent( TRACE_ERROR, "Failed to open management socket. %s", strerror(errno) );
