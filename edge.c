@@ -495,7 +495,7 @@ static void help() {
   printf("-d <tun device>          | tun device name\n");
 #endif
 
-  printf("-i <interface>           | tBinds to a specified interface device <interface>\n");
+  printf("-i <interface>           | Binds to a specified interface device <interface>\n");
   printf("-a <mode:address>        | Set interface address. For DHCP use '-r -a dhcp:0.0.0.0'\n");
   printf("-c <community>           | n2n community name the edge belongs to.\n");
   printf("-k <encrypt key>         | Encryption key (ASCII) - also N2N_KEY=<encrypt key>. Not with -K.\n");
